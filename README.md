@@ -23,7 +23,9 @@ All primary goals were achieved. No stretch goals were achieved within the given
 
 ## Setup
 
-Run `bundle install` to install Rails and dependencies.
+Clone this repo. You will need **Ruby 2.6.1** and **Rails 5.2.3** installed.
+
+Run `bundle install` inside the main /order-payment-graphql-api/ directory to install Rails and dependencies.
 
 To create the database, run `rails db:create` to create the SQLite development database, followed by `rails db:migrate` to run the Rails migrations, and finally `rails db:seed` to add seed data.
 
