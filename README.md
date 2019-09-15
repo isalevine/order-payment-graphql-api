@@ -7,7 +7,7 @@
 
 ### Models
 
-* `Order`
+#### `Order`
     * Model fields:
         * description (string)
         * total (float)
@@ -27,7 +27,7 @@
         * `payments` and `pending_order_payments` fields are disabled -- uncomment fields in /app/graphql/types/order_type.rb to enable queries
 
 
-* `Payment`
+#### `Payment`
     * Model fields:
         * amount (float)
         * note (string) -- optional
@@ -41,7 +41,7 @@
         * Ideally, would refactor to be updated after an `Order`'s `balanceDue` is calculated and confirmed to have applied the `Payment` `amount`
 
 
-* `PendingOrderPayment`
+#### `PendingOrderPayment`
     * Model fields:
         * order_id (integer)
         * payment_id (integer)
