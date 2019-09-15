@@ -15,7 +15,7 @@ class Mutations::CreateOrder < Mutations::BaseMutation
         else
             {
                 order: nil,
-                errors: order.errors. full_messages
+                errors: order.errors.full_messages
             }
         end
     end
