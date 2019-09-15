@@ -195,7 +195,8 @@ In addition to the basic requirements of the challenge, there are several implem
 
 * Use `reference_key` (randomly-generated UUID) to mask models' ids, and as primary `Order` identifier for mutations
 
-* Use `idempotency_key` (randomly-generated UUID) with both `Payment` and `PendingOrderPayment` models to ensure that transactions are not duplicated, and provide more explicit error handling
+* Use `idempotency_key` (randomly-generated UUID) with both `Payment` and `PendingOrderPayment` models to ensure that transactions are not duplicated, and provide more explicit error handling.
+    * This strategy is owed to the "Track Requests" strategy in this article: https://engineering.shopify.com/blogs/engineering/building-resilient-graphql-apis-using-idempotency
 
 * "Order has_many Payments through PendingOrderPayments" -- Use `PendingOrderPayment`'s statuses ("Successful", "Pending", "Failed") to filter/organize payments returned by queries
     * ex. Only `Payment`s with a "Successful" `PendingOrderPayment` will be calculated for `Order`'s `balance_due` field.
@@ -279,6 +280,8 @@ Steps included:
     * GitHub repo with practice app: [https://github.com/isalevine/graphql-ruby-practice/settings](https://github.com/isalevine/graphql-ruby-practice/settings)
 
 * Filtering has_many-through relationships: [https://stackoverflow.com/a/9547179](https://stackoverflow.com/a/9547179)
+
+* Implementing idempotency (see the "Track Requests" strategy): https://engineering.shopify.com/blogs/engineering/building-resilient-graphql-apis-using-idempotency
 
 * GraphQL Ruby docs: [https://graphql-ruby.org/guides](https://graphql-ruby.org/guides)
 
