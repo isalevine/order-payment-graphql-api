@@ -46,7 +46,7 @@ class Mutations::CreatePayment < Mutations::BaseMutation
                     order: nil,
                     errors: ["PendingOrderPayment with status '#{pendingOrderPayment.status}' and matching idempotency_key detected -- payment declined!"]
                 }
-            # Payment not applied -- retry updating Order's balanceDue
+            # Payment not applied -- retry updating Order's balance_due field
             elsif pendingOrderPayment.status == "Pending" || pendingOrderPayment.status == "Failed"
                 return lookupOrderReferenceKey(paymentDataHash, idempotency_key: idempotency_key, pendingOrderPayment: pendingOrderPayment)
             end
@@ -61,8 +61,7 @@ class Mutations::CreatePayment < Mutations::BaseMutation
     def lookupOrderReferenceKey(paymentDataHash, idempotency_key, pendingOrderPayment: nil)
         order = Order.find_by(reference_key: paymentDataHash[:reference_key])
 
-        # Order successfully found -- create new Payment and PendingOrderPayment,
-        # and test if Payment will change Order's balanceDue by expected amount
+        # Order successfully found -- proceed to apply Payment
         if order
             return applyPaymentToOrder(paymentDataHash, order, idempotency_key, pendingOrderPayment: pendingOrderPayment)
 
@@ -77,31 +76,34 @@ class Mutations::CreatePayment < Mutations::BaseMutation
 
 
     def applyPaymentToOrder(paymentDataHash, order, idempotency_key, pendingOrderPayment: nil)
+        # Create and save new Payment and PendingOrderPayment objects to database
         payment = Payment.create(amount: paymentDataHash[:amount], note: paymentDataHash[:note], idempotency_key: idempotency_key)
         if !pendingOrderPayment
             pendingOrderPayment = PendingOrderPayment.create(order_id: order.id, payment_id: payment.id, idempotency_key: idempotency_key, status: "Pending")
         end
 
+        # Test if Payment will change Order's balance_due field by expected amount
         starting_balance = order.balance_due
         expected_balance = starting_balance - payment.amount
 
+        # Set status to "Successful" (temporarily) to verify that its Amount is calculated in Order's balance_due field
         pendingOrderPayment.status = "Successful"
         pendingOrderPayment.save
         
-        # If balanceDue is expected value, return Order -- successfulPayments will include new Payment
+        # If balance_due is expected value, return Order -- successfulPayments will include new Payment
         if order.balance_due == expected_balance
             return {
                 order: order,
                 errors: []
             }
 
-        # balanceDue is not expected value -- change status to "Failed" and decline Payment
+        # balance_due is not expected value -- change status to "Failed" and decline Payment
         else
             pendingOrderPayment.status = "Failed"
             pendingOrderPayment.save
             return {
                 order: nil,
-                errors: ["Unexpected value for Order's balanceDue -- PendingOrderPayment status is now '#{pendingOrderPayment.status}' -- payment declined!"]
+                errors: ["Unexpected value for Order's balance_due field -- PendingOrderPayment status is now '#{pendingOrderPayment.status}' -- payment declined!"]
             }
         end
     end
