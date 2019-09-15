@@ -19,6 +19,7 @@
 ### Assumptions
 
 1. All access to the API is already authenticated -- assume that creating orders and adding payments are both user-authenticated, and that querying for all orders is an admin privilege.
+1. All Float math will eventually need to be refactored -- either make into Integer math (and output by formatting with 2-decimal Float), or do some .floor() rounding.
 
 
 ### Primary Goals
