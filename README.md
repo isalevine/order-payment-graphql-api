@@ -4,10 +4,25 @@
 
 ## Overview
 
+This Order Payment GraphQL API is a Rails app that accepts GraphQL queries and mutations. It uses `Order` and `Payment` models, as well as a `PendingOrderPayment` model to join them (as well as provide idempotency-checking and status updates). 
 
-### Models
+The models can be illustrated and described as:
+`Order --< PendingOrderPayment >-- Payment`
+*"An Order has many Payments through PendingOrderPayments."*
 
-#### `Order`
+`Order`s are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a `Payment` to an `Order`!**
+
+`Payment`s are checked for idempotency by having a unique, random UUID for their `idempotency_key` String field. `PendingOrderPayment`s are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
+
+The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `createOrder` and `createPayment`. See the **Queries** and **Mutations** sections below for more information.
+
+All primary goals were achieved. No stretch goals were achieved within the given timeframe. See **Assumptions**, notes under each **Model**, and the **Work Summary** below for more information on design choices, challenges encountered, and refactoring goals.
+
+
+
+## Models
+
+### `Order`
 * Model fields:
     * description (string)
     * total (float)
@@ -27,7 +42,7 @@
     * `payments` and `pending_order_payments` fields are disabled -- uncomment fields in /app/graphql/types/order_type.rb to enable queries
 
 
-#### `Payment`
+### `Payment`
 * Model fields:
     * amount (float)
     * note (string) -- optional
@@ -41,7 +56,7 @@
     * Ideally, would refactor to be updated after an `Order`'s `balanceDue` is calculated and confirmed to have applied the `Payment` `amount`
 
 
-#### `PendingOrderPayment`
+### `PendingOrderPayment`
 * Model fields:
     * order_id (integer)
     * payment_id (integer)
@@ -58,7 +73,7 @@
         1. Create another `status` like `Being Applied` that can be used with `balanceDue` while keeping the "Successful" `Payments` separate
 
 
-### Assumptions
+## Assumptions
 
 1. Idempotency for `Payment`s is implemented by generating a unique, random UUID (the `idempotency_key` field on `Payment` and `PendingOrderPayment`) as part of the `resolve()` method the CreatePayment mutation. **This assumes that errors resulting in sending the same API call multiple times HAS THE SAME idempotency_key!**
     * Testing for catching non-unique idempotency_keys involved mocking creating a `Payment` with a non-unique string.
@@ -67,7 +82,7 @@
 1. All Float math will eventually need to be refactored -- either make into Integer math (and output by formatting with 2-decimal Float), or do some .floor() rounding.
 
 
-### Primary Goals
+## Primary Goals
 
 In addition to the basic requirements of the challenge, there are several implementation goals I have. These pertain specifically to the API Extras **"Don't expose auto-incrementing IDs through your API"** and **"All mutations should be idempotent"**:
 
@@ -77,7 +92,7 @@ In addition to the basic requirements of the challenge, there are several implem
     * ex. Only `Payment`s with a "Successful" `PendingOrderPayment` will be calculated for `Order`'s `balance_due` field.
 
 
-### Stretch Goals
+## Stretch Goals
 
 * Add handling for `Payment`s exceeding `Order` totals
     * In the `Order` balanceDue query field, address by making minimum value 0.00
@@ -88,7 +103,6 @@ In addition to the basic requirements of the challenge, there are several implem
 * **"Explore subscriptions"** -- Use Rails' ActionMailer (completely new to me)
 * Add queries to search for `PendingOrderPayment`s with "Failed" or "Pending" status
 * Provide alternative to `reference_key` for Order lookup by implementing username/password/lookupKeyword fields on `Order` and the mutation to create `Payment`s, or adding a `User` model with `has_secure_password` to explicitly handle authentication
-
 
 
 
@@ -201,6 +215,16 @@ mutation {
 ## Work Summary
 
 
+### Further Work and Refactoring Goals
+
+
+### Breakdown of Time Spent
+* 1 hour - Reading documentation and familiarizing with GraphQL
+* 2 hours - Creating practice app with GraphQL Rails tutorial
+* 5 hours - Creating, testing, and refactoring main app
+* 1 hour - Adding final documentation and process notes to Readme
+
+
 ### Learning GraphQL
 
 Steps included:
@@ -211,11 +235,11 @@ Steps included:
 
 ### Resources Used
 
-* Rails GraphQL practice tutorial: https://mattboldt.com/2019/01/07/rails-and-graphql/
-    * GitHub repo with practice app: https://github.com/isalevine/graphql-ruby-practice/settings
+* Rails GraphQL practice tutorial: [https://mattboldt.com/2019/01/07/rails-and-graphql/](https://mattboldt.com/2019/01/07/rails-and-graphql/)
+    * GitHub repo with practice app: [https://github.com/isalevine/graphql-ruby-practice/settings](https://github.com/isalevine/graphql-ruby-practice/settings)
 
-* Filtering has_many-through relationships: https://stackoverflow.com/a/9547179
+* Filtering has_many-through relationships: [https://stackoverflow.com/a/9547179](https://stackoverflow.com/a/9547179)
 
-* 
+* GraphQL Ruby docs: [https://graphql-ruby.org/guides](https://graphql-ruby.org/guides)
 
 
