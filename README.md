@@ -31,6 +31,11 @@ In addition to the basic requirements of the challenge, there are several implem
 
 ### Stretch Goals
 
+* Add handling for `Payment`s exceeding `Order` totals
+    * In the `Order` balanceDue query field, address by making minimum value 0.00
+        * Include a returned message about "Payment amounts exceed Order total!"
+    * **Alternately**, could block `Payment` before exceeding balanceDue
+        * Could also *change* `Payment` amount to the remaining balanceDue, and return a message saying "Payment amount reduced to not exceed balanceDue!"
 * **"Provide an atomic "place order and pay" mutation"** -- Ensure that all 3 models are valid before mutating database, else return error and persist no data
 * **"Explore subscriptions"** -- Use Rails' ActionMailer (completely new to me)
 * Add queries to search for `PendingOrderPayment`s with "Failed" or "Pending" status
