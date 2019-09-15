@@ -7,15 +7,25 @@ module Types
     field :balance_due, Float, null: false
     # field :payments, [Types::PaymentType], null: false
     # field :pending_order_payments, [Types::PendingOrderPaymentType], null: false
+    field :pending_payments, [Types::PaymentType], null: false
+    field :failed_payments, [Types::PaymentType], null: false
 
     def successful_payments
       object.payments.successful
     end
 
+    def pending_payments
+      object.payments.pending
+    end
+
+    def failed_payments
+      object.payments.failed
+    end
+
 
     def balance_due
       balance = object.total
-      
+
       if !object.payments.successful.empty?
         object.payments.successful.each do |payment|
           balance -= payment.amount

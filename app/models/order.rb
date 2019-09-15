@@ -1,10 +1,19 @@
 class Order < ApplicationRecord
     has_many :pending_order_payments
 
-    # suggestion per: https://stackoverflow.com/a/9547179
+    # Suggestion per: https://stackoverflow.com/a/9547179
+    # Use these methods with dot notation on object.payments to filter by status:
     has_many :payments, through: :pending_order_payments do
         def successful
             where("pending_order_payments.status = ?", "Successful")
+        end
+
+        def pending
+            where("pending_order_payments.status = ?", "Pending")
+        end
+
+        def failed
+            where("pending_order_payments.status = ?", "Failed")
         end
     end
 end

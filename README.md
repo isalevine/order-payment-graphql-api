@@ -10,6 +10,8 @@
 * `Order`
 
 * `Payment`
+    * Currently using `created_at` field as GraphQL::Types::ISO8601DateTime in lieu of `applied_at` in spec
+    * Ideally, would refactor to be updated after an `Order`'s `balanceDue` is calculated and confirmed to have applied the `Payment` `amount`
 
 * `PendingOrderPayment`
 
