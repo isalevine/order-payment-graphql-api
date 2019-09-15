@@ -16,4 +16,21 @@ class Order < ApplicationRecord
             where("pending_order_payments.status = ?", "Failed")
         end
     end
+
+    def balance_due
+        balance = self.total
+
+        if !self.payments.successful.empty?
+            self.payments.successful.each do |payment|
+            balance -= payment.amount
+            end
+        end
+
+        if balance < 0
+            balance = 0
+        end
+
+        return balance
+    end
+    
 end

@@ -22,22 +22,25 @@ module Types
       object.payments.failed
     end
 
+    # def balance_due
+    #   object.balance_due
+    # end
 
-    def balance_due
-      balance = object.total
+    # def balance_due
+    #   balance = object.total
 
-      if !object.payments.successful.empty?
-        object.payments.successful.each do |payment|
-          balance -= payment.amount
-        end
-      end
+    #   if !object.payments.successful.empty?
+    #     object.payments.successful.each do |payment|
+    #       balance -= payment.amount
+    #     end
+    #   end
 
-      if balance < 0
-        balance = 0
-      end
+    #   if balance < 0
+    #     balance = 0
+    #   end
 
-      return balance
-    end
+    #   return balance
+    # end
 
 
   end
