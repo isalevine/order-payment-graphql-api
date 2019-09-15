@@ -48,11 +48,7 @@ In addition to the basic requirements of the challenge, there are several implem
 
 Run `bundle install` to install Rails and dependencies.
 
-To create the database, run `rails db:create`
-
-followed by `rails db:migrate`
-
-and finally `rails db:seed` to add seed data.
+To create the database, run `rails db:create` to create the SQLite development database, followed by `rails db:migrate` to run the Rails migrations and finally `rails db:seed` to add seed data.
 
 Run `rails s` to run the Rails server. Calls to the API can be made to `http://localhost:3000/graphql`.
 
@@ -61,10 +57,10 @@ Run `rails s` to run the Rails server. Calls to the API can be made to `http://l
 
 ## Executing Queries and Mutations
 
-Queries and mutations can be sent to the API using either: 
+Queries and mutations can be sent to the API using: 
 
 * `http://localhost:3000/graphql` and a tool like the [Insomnia REST client](https://insomnia.rest/)
-* The [GraphiQL IDE](https://github.com/graphql/graphiql) and `http://localhost:3000/graphiql` in-browser
+* ~~The [GraphiQL IDE](https://github.com/graphql/graphiql) and `http://localhost:3000/graphiql` in-browser~~ **This app was created with --skip-sprockets, so graphiql gem not configured to work!**
 
 
 ### Queries
