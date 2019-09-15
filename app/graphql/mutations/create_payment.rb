@@ -8,8 +8,9 @@ class Mutations::CreatePayment < Mutations::BaseMutation
 
     def resolve(reference_key:, amount:, note: nil)
         # Check if idempotency_key exists -- if true, this is a duplicate Payment!
-        idempotency_key = SecureRandom.uuid
+        idempotency_key = SecureRandom.uuid     # change this to a non-random String to test if idempotency_key match-found error is thrown (currently: yes!)
         pendingOrderPayment = PendingOrderPayment.find_by(idempotency_key: idempotency_key)
+        
         if pendingOrderPayment
             if pendingOrderPayment.status == "Successful"
                 return {
