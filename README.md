@@ -60,6 +60,9 @@
 
 ### Assumptions
 
+1. Idempotency for `Payment`s is implemented by generating a unique, random UUID (the `idempotency_key` field on `Payment` and `PendingOrderPayment`) as part of the `resolve()` method the CreatePayment mutation. **This assumes that errors resulting in sending the same API call multiple times HAS THE SAME idempotency_key!**
+    * Testing for catching non-unique idempotency_keys involved mocking creating a `Payment` with a non-unique string.
+    * More testing is needed to mock specific API call errors! (i.e. the EXACT SAME call being made twice due to a network interruption)
 1. All access to the API is already authenticated -- assume that creating orders and adding payments are both user-authenticated, and that querying for all orders is an admin privilege.
 1. All Float math will eventually need to be refactored -- either make into Integer math (and output by formatting with 2-decimal Float), or do some .floor() rounding.
 
@@ -104,15 +107,93 @@ Run `rails s` to run the Rails server. Calls to the API can be made to `http://l
 
 Queries and mutations can be sent to the API using: 
 
-* `http://localhost:3000/graphql` and a tool like the [Insomnia REST client](https://insomnia.rest/)
-* ~~The [GraphiQL IDE](https://github.com/graphql/graphiql) and `http://localhost:3000/graphiql` in-browser~~ **This app was created with --skip-sprockets, so graphiql gem not configured to work!**
+* **`http://localhost:3000/graphql`** and a tool like the [Insomnia REST client](https://insomnia.rest/)
+* ~~The [GraphiQL IDE](https://github.com/graphql/graphiql) and `http://localhost:3000/graphiql` in-browser~~ <= **This app was created with --skip-sprockets, so the 'graphiql' gem is not configured to work!**
 
 
 ### Queries
 
+* **allOrders** -- return all `Order`s:
+```
+query {
+  allOrders {
+      referenceKey
+      description
+      total
+      balanceDue
+      successfulPayments {
+        amount
+        note
+        createdAt
+      }
+      pendingPayments {
+        amount
+        note
+        createdAt
+      }
+      failedPayments {
+        amount
+        note
+        createdAt
+      }
+  }
+}
+```
+
 
 ### Mutations
 
+* **createOrder** -- create and return a new `Order`, with the following arguments:
+    * description (string)
+    * total (float) -- **Currently not verified to be a 2-digit float! May refactor to be an integer, and avoid float-math**
+```
+mutation {
+  createOrder(input: {
+    description: "Espresso Vivace beans, Vita roast",
+    total: 17.00
+  }) {
+    order {
+      referenceKey
+      description
+      total
+      balanceDue
+      successfulPayments {
+        amount
+        note
+        createdAt
+      }
+    }
+    errors
+  }
+}
+```
+
+* **createPayment** -- create a new `Payment` and return its `Order`, with the following arguments:
+    * referenceKey (string) -- UUID to identify `Order`
+    * amount (float)
+    * note (string) -- optional
+```
+mutation {
+  createPayment(input: {
+    referenceKey: "f22fcee8-1ffd-42f2-9834-3022bc1c3d3f",
+    amount: 0.05,
+    note: "First installment"
+  }) {
+    order {
+      referenceKey
+      description
+      total
+      balanceDue
+      successfulPayments {
+        amount
+        note
+        createdAt
+      }
+    }
+    errors
+  }
+}
+```
 
 
 
