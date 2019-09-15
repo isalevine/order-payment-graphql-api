@@ -210,12 +210,36 @@ mutation {
 ```
 
 
-
-
 ## Work Summary
 
 
-### Further Work and Refactoring Goals
+### Insights on Challenge
+
+* **How did you feel about it overall?** -- I really enjoyed this challenge! I appreciate opportunities to dive into a new technology, and GraphQL has been a great tool to explore. After working with it, I appreciate its strong typing (especially working in Ruby), and how intuitive it is to write queries and mutations once set up.
+
+
+* **What was the hardest part?** -- Implementing idempotency! It was easy enough to add a unique key to `Payment`s, but needing to load/instantiate a `PendingOrderPayment` object and check its `idempotency_key`--all during the resolve() method call in the `createPayment` mutation--became complicated. 
+
+Additionally, managing the `status` of the `PendingOrderPayment` led to non-atomic API calls, which is definitely sub-optimal. However, it did allow me to easily filter for `successfulPayments` on `Order` (as well as `pendingPayments` and `failedPayments`, if needed).
+
+
+* **What parts did you enjoy the most?** -- Building out custom methods on the `Order` model, especially the ones nested under the `has_many-through` relationship! I had never implemented ActiveRecord chaining/filtering directly on a model like that, and it ultimately made the `Order` model a lot more powerful, particularly in the `createPayment`'s complicated resolve() method. I'm excited to revisit this and go deeper in my personal Rails projects!
+
+I also enjoyed wrestling with how to implement idempotency! Though I don't think I have an optimal solution, I now know more about what strategies and issues to consider when trying to avoid duplicating API mutations.
+
+
+* **What shortcomings do you feel your solution currently has?** -- I know that the idempotency for `createPurchase` mutations needs to be more thoroughly tested. Most testing was done by mocking `Payment`s with a non-unique `idempotency_key`, but more specific scenarios need to be tested (i.e. a `Payment` being submitted twice due to a network interruption).
+
+I also know that the `PendingOrderPayment` `status` field is not used optimally (i.e. being set to "Successful" in order to check that it updates an `Order`'s `balance_due` accurately). I would like to revisit and refactor the methods to check `balance_due` and update `status`, and ideally make them more atomic (i.e. only change `status` once).
+
+
+* **What would you do next if you had more time to build it out?** --
+    1. Explore different ways to handle `idempotency_key` -- try storing keys from successful `Payments` directly on `Order`?
+    1. Build additional queries/mutations to fetch pending/failed payments, and either resolve or delete them?
+    1. Build more handling into `Payments` that put an `Order`'s balance below zero -- automatically revise `Payment` `amount`s and return a message to the user?
+    1. Add an atomic operation to create a new `Order` and `Payment` at the same time.
+    1. Explore subscriptions (and more other `Order`-lookup strategies) with a password-protected `User` model, and the ActiveMailer gem.
+    1. Add user/admin authentication to queries/mutations (instead of assuming they are handled outside of this app).
 
 
 ### Breakdown of Time Spent
