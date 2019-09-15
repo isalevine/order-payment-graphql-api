@@ -8,54 +8,54 @@
 ### Models
 
 #### `Order`
-    * Model fields:
-        * description (string)
-        * total (float)
-        * reference_key (string) -- random UUID used to mask sequential ID; **use this field for Order lookup**
-        * created_at (datetime)
-        * updated_at (datetime)
+* Model fields:
+    * description (string)
+    * total (float)
+    * reference_key (string) -- random UUID used to mask sequential ID; **use this field for Order lookup**
+    * created_at (datetime)
+    * updated_at (datetime)
 
-    * Custom Model methods:
-        * balance_due -- returns value of `Order` `total` minus the `amount`s of all "Successful" `Payment`s
+* Custom Model methods:
+    * balance_due -- returns value of `Order` `total` minus the `amount`s of all "Successful" `Payment`s
 
-    * Custom GraphQL fields:
-        * successful_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Successful"
-        * pending_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Pending"
-        * failed_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Failed"
+* Custom GraphQL fields:
+    * successful_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Successful"
+    * pending_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Pending"
+    * failed_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Failed"
 
-    * Notes:
-        * `payments` and `pending_order_payments` fields are disabled -- uncomment fields in /app/graphql/types/order_type.rb to enable queries
+* Notes:
+    * `payments` and `pending_order_payments` fields are disabled -- uncomment fields in /app/graphql/types/order_type.rb to enable queries
 
 
 #### `Payment`
-    * Model fields:
-        * amount (float)
-        * note (string) -- optional
-        * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
-            * **Resubmitted mutations should NOT generate a new idempotency_key**, thus allowing duplicates to be caught
-        * created_at (datetime)
-        * updated_at (datetime)
+* Model fields:
+    * amount (float)
+    * note (string) -- optional
+    * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
+        * **Resubmitted mutations should NOT generate a new idempotency_key**, thus allowing duplicates to be caught
+    * created_at (datetime)
+    * updated_at (datetime)
 
-    * Notes:
-        * Currently using `created_at` field as GraphQL::Types::ISO8601DateTime in lieu of `applied_at` in spec
-        * Ideally, would refactor to be updated after an `Order`'s `balanceDue` is calculated and confirmed to have applied the `Payment` `amount`
+* Notes:
+    * Currently using `created_at` field as GraphQL::Types::ISO8601DateTime in lieu of `applied_at` in spec
+    * Ideally, would refactor to be updated after an `Order`'s `balanceDue` is calculated and confirmed to have applied the `Payment` `amount`
 
 
 #### `PendingOrderPayment`
-    * Model fields:
-        * order_id (integer)
-        * payment_id (integer)
-        * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
-        * status (string)
-            * created as "Pending"
-            * set to "Successful" when applied to Order
-            * set to "Failed" when a duplicate Payment is caught
+* Model fields:
+    * order_id (integer)
+    * payment_id (integer)
+    * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
+    * status (string)
+        * created as "Pending"
+        * set to "Successful" when applied to Order
+        * set to "Failed" when a duplicate Payment is caught
 
-    * Notes:
-        * Currently, `status` is set to "Successful" while verifying the change to an `Order`'s `balanceDue` -- this could cause errors!
-        * Possible solutions:
-            1. Create another `Order` method like `pendingBalanceDue`, which can calculate the incoming `Payment`'s amount while the `PendingOrderPayment`'s `status` is "Pending"
-            1. Create another `status` like `Being Applied` that can be used with `balanceDue` while keeping the "Successful" `Payments` separate
+* Notes:
+    * Currently, `status` is set to "Successful" while verifying the change to an `Order`'s `balanceDue` -- this could cause errors!
+    * Possible solutions:
+        1. Create another `Order` method like `pendingBalanceDue`, which can calculate the incoming `Payment`'s amount while the `PendingOrderPayment`'s `status` is "Pending"
+        1. Create another `status` like `Being Applied` that can be used with `balanceDue` while keeping the "Successful" `Payments` separate
 
 
 ### Assumptions
