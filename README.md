@@ -25,9 +25,9 @@ All primary goals were achieved. No stretch goals were achieved within the given
 
 Run `bundle install` to install Rails and dependencies.
 
-To create the database, run `rails db:create` to create the SQLite development database, followed by `rails db:migrate` to run the Rails migrations and finally `rails db:seed` to add seed data.
+To create the database, run `rails db:create` to create the SQLite development database, followed by `rails db:migrate` to run the Rails migrations, and finally `rails db:seed` to add seed data.
 
-Run `rails s` to run the Rails server. Calls to the API can be made to `http://localhost:3000/graphql`.
+Run `rails s` to start the Rails server. Calls to the API are made to `http://localhost:3000/graphql`.
 
 
 
