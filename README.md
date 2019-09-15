@@ -240,6 +240,8 @@ I also know that the `PendingOrderPayment` `status` field is not used optimally 
 
 
 * **What would you do next if you had more time to build it out?** --
+    1. Refactor all Float math into Integer math, and format outputs as Floats with two decimal places.
+
     1. Explore different ways to handle `idempotency_key` -- try storing keys from successful `Payments` directly on `Order`?
 
     1. Build additional queries/mutations to fetch pending/failed payments, and either resolve or delete them?
@@ -249,7 +251,7 @@ I also know that the `PendingOrderPayment` `status` field is not used optimally 
     1. Add an atomic operation to create a new `Order` and `Payment` at the same time.
 
     1. Explore subscriptions (and more other `Order`-lookup strategies) with a password-protected `User` model, and the ActiveMailer gem.
-    
+
     1. Add user/admin authentication to queries/mutations (instead of assuming they are handled outside of this app).
 
 
