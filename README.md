@@ -33,6 +33,7 @@ In addition to the basic requirements of the challenge, there are several implem
 
 * **"Provide an atomic "place order and pay" mutation"** -- Ensure that all 3 models are valid before mutating database, else return error and persist no data
 * **"Explore subscriptions"** -- Use Rails' ActionMailer (completely new to me)
+* Add queries to search for `PendingOrderPayment`s with "Failed" or "Pending" status
 * Provide alternative to `reference_key` for Order lookup by implementing username/password/lookupKeyword fields on `Order` and the mutation to create `Payment`s, or adding a `User` model with `has_secure_password` to explicitly handle authentication
 
 
