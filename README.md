@@ -74,6 +74,7 @@ Queries and mutations can be sent to the API using:
 
 ## Work Summary
 
+
 ### Learning GraphQL
 
 Steps included:
@@ -81,6 +82,14 @@ Steps included:
 * Reading tutorials and creating a practice app
 * Taking handwritten notes to summarize practice, and list specific goals and strategies
 
+
 ### Resources Used
+
+* Rails GraphQL practice tutorial: https://mattboldt.com/2019/01/07/rails-and-graphql/
+    * GitHub repo with practice app: https://github.com/isalevine/graphql-ruby-practice/settings
+
+* Filtering has_many-through relationships: https://stackoverflow.com/a/9547179
+
+* 
 
 
