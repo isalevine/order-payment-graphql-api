@@ -11,9 +11,9 @@ The models can be illustrated and described as:
 
 *"An Order has many Payments through PendingOrderPayments."*
 
-`Order`s are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
+`Orders` are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
 
-`Payment`s are checked for idempotency by having a unique, random UUID for their `idempotency_key`. `PendingOrderPayment`s are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
+`Payments` are checked for idempotency by having a unique, random UUID for their `idempotency_key`. `PendingOrderPayments` are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
 
 The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `createOrder` and `createPayment`. See the **Queries** and **Mutations** sections below for more information.
 
@@ -41,7 +41,7 @@ Queries and mutations can be sent to the API using **`http://localhost:3000/grap
 
 ### Queries
 
-* **allOrders** -- return all `Order`s:
+* **allOrders** -- return all `Orders`:
 ```
 query {
   allOrders {
@@ -136,7 +136,7 @@ mutation {
     * updated_at (datetime)
 
 * Custom Model methods:
-    * balance_due -- returns value of `Order` `total` minus the `amount`s of all "Successful" `Payment`s
+    * balance_due -- returns value of `Order` `total` minus the `amounts` of all "Successful" `Payments`
 
 * Custom GraphQL fields:
     * successful_payments -- return only `Payments` that have a `PendingOrderPayment` with `status` "Successful"
@@ -151,7 +151,7 @@ mutation {
 * Model fields:
     * amount (float)
     * note (string) -- optional
-    * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
+    * idempotency_key (string) -- random UUID used to identify duplicate `Payments` by checking `PendingOrderPayment`'s idempotency_key
         * **Resubmitted mutations should NOT generate a new idempotency_key**, thus allowing duplicates to be caught
     * created_at (datetime)
     * updated_at (datetime)
@@ -165,7 +165,7 @@ mutation {
 * Model fields:
     * order_id (integer)
     * payment_id (integer)
-    * idempotency_key (string) -- random UUID used to identify duplicate `Payment`s by checking `PendingOrderPayment`'s idempotency_key
+    * idempotency_key (string) -- random UUID used to identify duplicate `Payments` by checking `PendingOrderPayment`'s idempotency_key
     * status (string)
         * created as "Pending"
         * set to "Successful" when applied to Order
@@ -180,7 +180,7 @@ mutation {
 
 ## Assumptions
 
-1. Idempotency for `Payment`s is implemented by generating a unique, random UUID (the `idempotency_key` field on `Payment` and `PendingOrderPayment`) as part of the `resolve()` method the CreatePayment mutation. **This assumes that errors resulting in sending the same API call multiple times HAS THE SAME idempotency_key!**
+1. Idempotency for `Payments` is implemented by generating a unique, random UUID (the `idempotency_key` field on `Payment` and `PendingOrderPayment`) as part of the `resolve()` method the CreatePayment mutation. **This assumes that errors resulting in sending the same API call multiple times HAS THE SAME idempotency_key!**
     * Testing for catching non-unique idempotency_keys involved mocking creating a `Payment` with a non-unique string.
     * More testing is needed to mock specific API call errors! (i.e. the EXACT SAME call being made twice due to a network interruption)
 
@@ -199,12 +199,12 @@ In addition to the basic requirements of the challenge, there are several implem
     * This strategy is owed to the "Track Requests" strategy in this article: https://engineering.shopify.com/blogs/engineering/building-resilient-graphql-apis-using-idempotency
 
 * "Order has_many Payments through PendingOrderPayments" -- Use `PendingOrderPayment`'s statuses ("Successful", "Pending", "Failed") to filter/organize payments returned by queries
-    * ex. Only `Payment`s with a "Successful" `PendingOrderPayment` will be calculated for `Order`'s `balance_due` field.
+    * ex. Only `Payments` with a "Successful" `PendingOrderPayment` will be calculated for `Order`'s `balance_due` field.
 
 
 ## Stretch Goals
 
-* Add handling for `Payment`s exceeding `Order` totals
+* Add handling for `Payments` exceeding `Order` totals
     * In the `Order` balanceDue query field, address by making minimum value 0.00
         * Include a returned message about "Payment amounts exceed Order total!"
     * **Alternately**, could block `Payment` before exceeding balanceDue
@@ -214,9 +214,9 @@ In addition to the basic requirements of the challenge, there are several implem
 
 * **"Explore subscriptions"** -- Use Rails' ActionMailer (completely new to me)
 
-* Add queries to search for `PendingOrderPayment`s with "Failed" or "Pending" status
+* Add queries to search for `PendingOrderPayments` with "Failed" or "Pending" status
 
-* Provide alternative to `reference_key` for Order lookup by implementing username/password/lookupKeyword fields on `Order` and the mutation to create `Payment`s, or adding a `User` model with `has_secure_password` to explicitly handle authentication
+* Provide alternative to `reference_key` for Order lookup by implementing username/password/lookupKeyword fields on `Order` and the mutation to create `Payments`, or adding a `User` model with `has_secure_password` to explicitly handle authentication
 
 
 
@@ -228,19 +228,23 @@ In addition to the basic requirements of the challenge, there are several implem
 * **How did you feel about it overall?** -- I really enjoyed this challenge! I appreciate opportunities to dive into a new technology, and GraphQL has been a great tool to explore. After working with it, I appreciate its strong typing (especially working in Ruby), and how intuitive it is to write queries and mutations once set up.
 
 
-* **What was the hardest part?** -- Implementing idempotency! It was easy enough to add a unique key to `Payment`s, but needing to load/instantiate a `PendingOrderPayment` object and check its `idempotency_key`--all during the resolve() method call in the `createPayment` mutation--became complicated. 
+* **What was the hardest part?** -- Implementing idempotency! I wanted to follow the "Track Requests" strategy in this article on idempotency, and created the `PendingOrderPayment` to handle payment `statuses` and store `idempotency_keys`.
 
-Additionally, managing the `status` of the `PendingOrderPayment` led to non-atomic API calls, which is definitely sub-optimal. However, it did allow me to easily filter for `successfulPayments` on `Order` (as well as `pendingPayments` and `failedPayments`, if needed).
+  It was easy enough to add a unique key to `Payments`, but needing to load/instantiate a `PendingOrderPayment` object and check its `idempotency_key`--all during the resolve() method call in the `createPayment` mutation--became a complicated process. Given more time, I would certainly revisit this database structure, and seek more guidance on idempotency.
+
+  Additionally, managing the `status` of the `PendingOrderPayment` led to non-atomic API calls, which is definitely sub-optimal. However, it did allow me to easily filter for `successfulPayments` on `Order` (as well as `pendingPayments` and `failedPayments`, if needed).
 
 
-* **What parts did you enjoy the most?** -- Building out custom methods on the `Order` model, especially the ones nested under the `has_many-through` relationship! I had never implemented ActiveRecord chaining/filtering directly on a model like that, and it ultimately made the `Order` model a lot more powerful, particularly in the `createPayment`'s complicated resolve() method. I'm excited to revisit this and go deeper in my personal Rails projects!
+* **What parts did you enjoy the most?** -- Building out custom methods on the `Order` model, especially the ones nested under the `has_many-through` relationship! As part of using the `PendingOrderPayment` `status` to filter `Payments`, I was able to define custom functions to chain ActiveRecord filters onto the `Payments` belonging to a given `Order`.
+
+I had never implemented ActiveRecord chaining/filtering directly on a model like that, and it ultimately made the `Order` model a lot more powerful, particularly in the `createPayment`'s complicated resolve() method. I'm excited to revisit this and go deeper in my personal Rails projects!
 
 I also enjoyed wrestling with how to implement idempotency! Though I don't think I have an optimal solution, I now know more about what strategies and issues to consider when trying to avoid duplicating API mutations.
 
 
-* **What shortcomings do you feel your solution currently has?** -- I know that the idempotency for `createPurchase` mutations needs to be more thoroughly tested. Most testing was done by mocking `Payment`s with a non-unique `idempotency_key`, but more specific scenarios need to be tested (i.e. a `Payment` being submitted twice due to a network interruption).
+* **What shortcomings do you feel your solution currently has?** -- I know that the idempotency for `createPurchase` mutations needs to be more thoroughly tested. Most testing was done by mocking `Payments` with a non-unique `idempotency_key`, but more specific scenarios need to be tested (i.e. a `Payment` being submitted twice due to a network interruption).
 
-I also know that the `PendingOrderPayment` `status` field is not used optimally (i.e. being set to "Successful" in order to check that it updates an `Order`'s `balance_due` accurately). I would like to revisit and refactor the methods to check `balance_due` and update `status`, and ideally make them more atomic (i.e. only change `status` once).
+I also know that the `PendingOrderPayment` `status` field is not used optimally (i.e. being set to "Successful" in order to check that it updates an `Order`'s `balance_due` accurately). I would like to revisit and refactor the methods to check `balance_due` and update `status`, and ideally make them more atomic (i.e. only change `status` once). On a larger scale, I would also like to revisit the `PendingOrderPayment` model for handling idempotency, and seek out more experienced advice on implementing it efficiently (or completely refactoring to a different database structure).
 
 
 * **What would you do next if you had more time to build it out?** --
@@ -250,7 +254,7 @@ I also know that the `PendingOrderPayment` `status` field is not used optimally 
 
     1. Build additional queries/mutations to fetch pending/failed payments, and either resolve or delete them?
 
-    1. Build more handling into `Payments` that put an `Order`'s balance below zero -- automatically revise `Payment` `amount`s and return a message to the user?
+    1. Build more handling into `Payments` that put an `Order`'s balance below zero -- automatically revise `Payment` `amounts` and return a message to the user?
 
     1. Add an atomic operation to create a new `Order` and `Payment` at the same time.
 
