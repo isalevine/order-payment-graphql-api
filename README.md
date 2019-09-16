@@ -11,9 +11,9 @@ The models can be illustrated and described as:
 
 *"An Order has many Payments through PendingOrderPayments."*
 
-`Order`s are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
+`Orders` are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
 
-`Payment`s are checked for idempotency by having a unique, random UUID for their `idempotency_key`. `PendingOrderPayment`s are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
+`Payments` are checked for idempotency by having a unique, random UUID for their `idempotency_key`. `PendingOrderPayments` are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
 
 The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `createOrder` and `createPayment`. See the **Queries** and **Mutations** sections below for more information.
 
@@ -41,7 +41,7 @@ Queries and mutations can be sent to the API using **`http://localhost:3000/grap
 
 ### Queries
 
-* **allOrders** -- return all `Order`s:
+* **allOrders** -- return all `Orders`:
 ```
 query {
   allOrders {
