@@ -228,7 +228,7 @@ In addition to the basic requirements of the challenge, there are several implem
 * **How did you feel about it overall?** -- I really enjoyed this challenge! I appreciate opportunities to dive into a new technology, and GraphQL has been a great tool to explore. After working with it, I appreciate its strong typing (especially working in Ruby), and how intuitive it is to write queries and mutations once set up.
 
 
-* **What was the hardest part?** -- Implementing idempotency! I wanted to follow the "Track Requests" strategy in this article on idempotency, and created the `PendingOrderPayment` to handle payment `statuses` and store `idempotency_keys`.
+* **What was the hardest part?** -- Implementing idempotency! I wanted to follow [the "Track Requests" strategy in this article on idempotency](https://engineering.shopify.com/blogs/engineering/building-resilient-graphql-apis-using-idempotency), and created the `PendingOrderPayment` to handle payment `statuses` and store `idempotency_keys`.
 
   It was easy enough to add a unique key to `Payments`, but needing to load/instantiate a `PendingOrderPayment` object and check its `idempotency_key`--all during the resolve() method call in the `createPayment` mutation--became a complicated process. Given more time, I would certainly revisit this database structure, and seek more guidance on idempotency.
 
