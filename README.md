@@ -30,7 +30,7 @@ All primary goals were achieved. No stretch goals were achieved within the given
   
   [See the breakdown of time spent,](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) as well as [steps to learn GraphQL](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) and the [resources used.](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent)
 
-* **This served as the basis for my 3rd most viewed Dev.to blog, [a tutorial for creating a Rails GraphQL API from scratch!](https://dev.to/isalevine/ruby-on-rails-graphql-api-tutorial-from-rails-new-to-first-query-76h)** 
+* **This served as the basis for my 3rd-most-viewed Dev.to blog, [a tutorial for creating a Rails GraphQL API from scratch!](https://dev.to/isalevine/ruby-on-rails-graphql-api-tutorial-from-rails-new-to-first-query-76h)** 
 
   This is part of a three-blog series that also includes [creating GraphQL mutations](https://dev.to/isalevine/ruby-on-rails-graphql-api-tutorial-creating-data-with-mutations-39ab), and [two ways to filter GraphQL data!](https://dev.to/isalevine/ruby-on-rails-graphql-api-tutorial-filtering-with-custom-fields-and-class-methods-3efd)
 
