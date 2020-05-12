@@ -19,6 +19,10 @@ The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `crea
 
 All primary goals were achieved. No stretch goals were achieved within the given timeframe. See **Assumptions**, notes under each **Model**, and the **Work Summary** below for more information on design choices, challenges encountered, and refactoring goals.
 
+## Highlights
+
+
+
 
 
 ## Setup
