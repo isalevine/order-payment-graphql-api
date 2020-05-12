@@ -18,9 +18,12 @@ All primary goals were achieved. No stretch goals were achieved within the given
 
 
 ## Highlights
-* **Idempotency implemented for all payment transactions [via the use of UUIDs!](https://github.com/isalevine/order-payment-graphql-api/blob/dead714af93a9e945e468f32d4bf9611e6920177/app/graphql/mutations/create_payment.rb#L34)** This required learning about best practices for implementing idempotency in APIs.
-* **The Order model has its `has_many :payments` relationship [expanded with filtering via a `do` block!](https://github.com/isalevine/order-payment-graphql-api/blob/f71839655162b711ecdaf6d10c0978c80f935a0a/app/models/order.rb#L6)** Customizing `has_many` blocks is a useful (and often unheard-of) way to add functionality accessible via dot notation, i.e. `Order.payments.successful`.
-* **I learned GraphQL from scratch and created this API in 8 hours!** [See the breakdown of time spent,](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) as well as [steps to learn GraphQL](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) and the [resources used.](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent)
+* **Idempotency implemented for all payment transactions [via the use of UUIDs!](https://github.com/isalevine/order-payment-graphql-api/blob/dead714af93a9e945e468f32d4bf9611e6920177/app/graphql/mutations/create_payment.rb#L34)** 
+  This required learning about best practices for implementing idempotency in APIs.
+* **The Order model has its `has_many :payments` relationship [expanded with filtering via a `do` block!](https://github.com/isalevine/order-payment-graphql-api/blob/f71839655162b711ecdaf6d10c0978c80f935a0a/app/models/order.rb#L6)** 
+  Customizing `has_many` blocks is a useful (and often unheard-of) way to add functionality accessible via dot notation, i.e. `Order.payments.successful`.
+* **I learned GraphQL from scratch and created this API in 8 hours!** 
+  [See the breakdown of time spent,](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) as well as [steps to learn GraphQL](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent) and the [resources used.](https://github.com/isalevine/order-payment-graphql-api/blob/master/README.md#breakdown-of-time-spent)
 
 
 ## Setup
