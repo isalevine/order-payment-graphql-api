@@ -1,9 +1,6 @@
 # README
 
-
-
 ## Overview
-
 This Order Payment GraphQL API is a Rails app that accepts GraphQL queries and mutations. It uses `Order` and `Payment` models, as well as a `PendingOrderPayment` model to join them (as well as provide idempotency-checking and status updates). 
 
 The models can be illustrated and described as:
@@ -19,14 +16,14 @@ The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `crea
 
 All primary goals were achieved. No stretch goals were achieved within the given timeframe. See **Assumptions**, notes under each **Model**, and the **Work Summary** below for more information on design choices, challenges encountered, and refactoring goals.
 
+
 ## Highlights
-
-
-
+* **Idempotency implemented for all payment transactions via the use of UUIDs!** This required learning about best practices for implementing idempotency in APIs.
+* **The Order model has its `has_many :payments` relationship expanded with filtering via a `do` block!** Customizing `has_many` blocks is a useful (and often unheard-of) way to add functionality accessible via dot notation, i.e. `Order.payments.successful`.
+* **I learned GraphQL from scratch and created this API in 8 hours!** See the breakdown of time spent at the bottom, in the Work Summary section.
 
 
 ## Setup
-
 Clone this repo. You will need **Ruby 2.6.1** and **Rails 5.2.3** installed.
 
 Run `bundle install` inside the main /order-payment-graphql-api/ directory to install Rails and dependencies.
@@ -36,15 +33,11 @@ To create the database, run `rails db:create` to create the SQLite development d
 Run `rails s` to start the Rails server. Calls to the API are made to `http://localhost:3000/graphql`.
 
 
-
-
 ## Executing Queries and Mutations
-
 Queries and mutations can be sent to the API using **`http://localhost:3000/graphql`** and a tool like the [Insomnia REST client](https://insomnia.rest/)
 
 
 ### Queries
-
 * **allOrders** -- return all `Orders`:
 ```
 query {
@@ -71,7 +64,6 @@ query {
   }
 }
 ```
-
 
 ### Mutations
 
@@ -128,7 +120,6 @@ mutation {
 ```
 
 
-
 ## Models
 
 ### `Order`
@@ -183,7 +174,6 @@ mutation {
 
 
 ## Assumptions
-
 1. Idempotency for `Payments` is implemented by generating a unique, random UUID (the `idempotency_key` field on `Payment` and `PendingOrderPayment`) as part of the `resolve()` method the CreatePayment mutation. **This assumes that errors resulting in sending the same API call multiple times HAS THE SAME idempotency_key!**
   * Testing for catching non-unique idempotency_keys involved mocking creating a `Payment` with a non-unique string.
   * More testing is needed to mock specific API call errors! (i.e. the EXACT SAME call being made twice due to a network interruption)
@@ -194,7 +184,6 @@ mutation {
 
 
 ## Primary Goals
-
 In addition to the basic requirements of the challenge, there are several implementation goals I have. These pertain specifically to the API Extras **"Don't expose auto-incrementing IDs through your API"** and **"All mutations should be idempotent"**:
 
 * Use `reference_key` (randomly-generated UUID) to mask models' ids, and as primary `Order` identifier for mutations
@@ -207,12 +196,11 @@ In addition to the basic requirements of the challenge, there are several implem
 
 
 ## Stretch Goals
-
 * Add handling for `Payments` exceeding `Order` totals
-    * In the `Order` balanceDue query field, address by making minimum value 0.00
-        * Include a returned message about "Payment amounts exceed Order total!"
-    * **Alternately**, could block `Payment` before exceeding balanceDue
-        * Could also *change* `Payment` amount to the remaining balanceDue, and return a message saying "Payment amount reduced to not exceed balanceDue!"
+  * In the `Order` balanceDue query field, address by making minimum value 0.00
+    * Include a returned message about "Payment amounts exceed Order total!"
+  * **Alternately**, could block `Payment` before exceeding balanceDue
+    * Could also *change* `Payment` amount to the remaining balanceDue, and return a message saying "Payment amount reduced to not exceed balanceDue!"
 
 * **"Provide an atomic "place order and pay" mutation"** -- Ensure that all 3 models are valid before mutating database, else return error and persist no data
 
@@ -224,13 +212,10 @@ In addition to the basic requirements of the challenge, there are several implem
 
 
 
-
 ## Work Summary
 
 ### Insights on Challenge
-
 * **How did you feel about it overall?** -- I really enjoyed this challenge! I appreciate opportunities to dive into a new technology, and GraphQL has been a great tool to explore. After working with it, I appreciate its strong typing (especially working in Ruby), and how intuitive it is to write queries and mutations once set up.
-
 
 * **What was the hardest part?** -- Implementing idempotency! I wanted to follow [the "Track Requests" strategy in this article on idempotency](https://engineering.shopify.com/blogs/engineering/building-resilient-graphql-apis-using-idempotency), and created the `PendingOrderPayment` to handle payment `statuses` and store `idempotency_keys`.
 
@@ -238,18 +223,15 @@ In addition to the basic requirements of the challenge, there are several implem
 
   Additionally, managing the `status` of the `PendingOrderPayment` led to non-atomic API calls, which is definitely sub-optimal. However, it did allow me to easily filter for `successfulPayments` on `Order` (as well as `pendingPayments` and `failedPayments`, if needed).
 
-
 * **What parts did you enjoy the most?** -- Building out custom methods on the `Order` model, especially the ones nested under the `has_many-through` relationship! As part of using the `PendingOrderPayment` `status` to filter `Payments`, I was able to define custom functions to chain ActiveRecord filters onto the `Payments` belonging to a given `Order`.
 
   I had never implemented ActiveRecord chaining/filtering directly on a model like that, and it ultimately made the `Order` model a lot more powerful, particularly in the `createPayment`'s complicated resolve() method. I'm excited to revisit this and go deeper in my personal Rails projects!
 
   I also enjoyed wrestling with how to implement idempotency! Though I don't think I have an optimal solution, I now know more about what strategies and issues to consider when trying to avoid duplicating API mutations.
 
-
 * **What shortcomings do you feel your solution currently has?** -- I know that the idempotency for `createPurchase` mutations needs to be more thoroughly tested. Most testing was done by mocking `Payments` with a non-unique `idempotency_key`, but more specific scenarios need to be tested (i.e. a `Payment` being submitted twice due to a network interruption).
 
   I also know that the `PendingOrderPayment` `status` field is not used optimally (i.e. being set to "Successful" in order to check that it updates an `Order`'s `balance_due` accurately). I would like to revisit and refactor the methods to check `balance_due` and update `status`, and ideally make them more atomic (i.e. only change `status` once). On a larger scale, I would also like to revisit the `PendingOrderPayment` model for handling idempotency, and seek out more experienced advice on implementing it efficiently (or completely refactoring to a different database structure).
-
 
 * **What would you do next if you had more time to build it out?** --
   1. Refactor all Float math into Integer math, and format outputs as Floats with two decimal places.
@@ -283,7 +265,6 @@ Steps included:
 
 
 ### Resources Used
-
 * Rails GraphQL practice tutorial: [https://mattboldt.com/2019/01/07/rails-and-graphql/](https://mattboldt.com/2019/01/07/rails-and-graphql/)
   * GitHub repo with practice app: [https://github.com/isalevine/graphql-ruby-practice/settings](https://github.com/isalevine/graphql-ruby-practice/settings)
 
