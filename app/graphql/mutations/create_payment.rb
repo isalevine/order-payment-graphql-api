@@ -19,50 +19,50 @@ class Mutations::CreatePayment < Mutations::BaseMutation
 
 
     # Is there a better way to organize + pass around Mutation arguments?
-    paymentDataHash = {
+    payment_data_hash = {
       reference_key: reference_key,
       amount: amount,
       note: note
     }
-    return lookupPaymentIdempotencyKey(paymentDataHash)
+    return find_payment_idempotency_key(payment_data_hash)
   end
 
 
   # Helper functions for resolve()
   # ==============================
 
-  def lookupPaymentIdempotencyKey(paymentDataHash)
+  def find_payment_idempotency_key(payment_data_hash)
     # New instances of the createPayment mutation will generate unique idempotency_key (UUID)
     idempotency_key = SecureRandom.uuid     # change this to a non-random String to test if idempotency_key match-found error is thrown (currently: yes!)
     
     # Check if idempotency_key already exists -- if so, transaction is a duplicate!
-    pendingOrderPayment = PendingOrderPayment.find_by(idempotency_key: idempotency_key)
-    if pendingOrderPayment
+    pending_order_payment = PendingOrderPayment.find_by(idempotency_key: idempotency_key)
+    if pending_order_payment
 
       # Payment already applied -- decline Payment!
-      if pendingOrderPayment.status == "Successful"
+      if pending_order_payment.status == "Successful"
         return {
           order: nil,
-          errors: ["PendingOrderPayment with status '#{pendingOrderPayment.status}' and matching idempotency_key detected -- payment declined!"]
+          errors: ["PendingOrderPayment with status '#{pending_order_payment.status}' and matching idempotency_key detected -- payment declined!"]
         }
       # Payment not applied -- retry updating Order's balance_due field
-      elsif pendingOrderPayment.status == "Pending" || pendingOrderPayment.status == "Failed"
-        return lookupOrderReferenceKey(paymentDataHash, idempotency_key: idempotency_key, pendingOrderPayment: pendingOrderPayment)
+      elsif pending_order_payment.status == "Pending" || pending_order_payment.status == "Failed"
+        return find_order_reference_key(payment_data_hash, idempotency_key: idempotency_key, pending_order_payment: pending_order_payment)
       end
 
     # No idempotency_key match found -- look up Order by reference_key to apply Payment
     else
-      return lookupOrderReferenceKey(paymentDataHash, idempotency_key)
+      return find_order_reference_key(payment_data_hash, idempotency_key)
     end
   end
 
 
-  def lookupOrderReferenceKey(paymentDataHash, idempotency_key, pendingOrderPayment: nil)
-    order = Order.find_by(reference_key: paymentDataHash[:reference_key])
+  def find_order_reference_key(payment_data_hash, idempotency_key, pending_order_payment: nil)
+    order = Order.find_by(reference_key: payment_data_hash[:reference_key])
 
     # Order successfully found -- proceed to apply Payment
     if order
-      return applyPaymentToOrder(paymentDataHash, order, idempotency_key, pendingOrderPayment: pendingOrderPayment)
+      return apply_payment_to_order(payment_data_hash, order, idempotency_key, pending_order_payment: pending_order_payment)
 
     # No Order found -- return errors
     else
@@ -74,11 +74,11 @@ class Mutations::CreatePayment < Mutations::BaseMutation
   end
 
 
-  def applyPaymentToOrder(paymentDataHash, order, idempotency_key, pendingOrderPayment: nil)
+  def apply_payment_to_order(payment_data_hash, order, idempotency_key, pending_order_payment: nil)
     # Create and save new Payment and PendingOrderPayment objects to database
-    payment = Payment.create(amount: paymentDataHash[:amount], note: paymentDataHash[:note], idempotency_key: idempotency_key)
-    if !pendingOrderPayment
-      pendingOrderPayment = PendingOrderPayment.create(order_id: order.id, payment_id: payment.id, idempotency_key: idempotency_key, status: "Pending")
+    payment = Payment.create(amount: payment_data_hash[:amount], note: payment_data_hash[:note], idempotency_key: idempotency_key)
+    if !pending_order_payment
+      pending_order_payment = PendingOrderPayment.create(order_id: order.id, payment_id: payment.id, idempotency_key: idempotency_key, status: "Pending")
     end
 
     # Test if Payment will change Order's balance_due field by expected amount
@@ -86,8 +86,8 @@ class Mutations::CreatePayment < Mutations::BaseMutation
     expected_balance = starting_balance - payment.amount
 
     # Set status to "Successful" (temporarily) to verify that its Amount is calculated in Order's balance_due field
-    pendingOrderPayment.status = "Successful"
-    pendingOrderPayment.save
+    pending_order_payment.status = "Successful"
+    pending_order_payment.save
     
     # If balance_due is expected value, return Order -- successfulPayments will include new Payment
     if order.balance_due == expected_balance
@@ -98,12 +98,13 @@ class Mutations::CreatePayment < Mutations::BaseMutation
 
     # balance_due is not expected value -- change status to "Failed" and decline Payment
     else
-      pendingOrderPayment.status = "Failed"
-      pendingOrderPayment.save
+      pending_order_payment.status = "Failed"
+      pending_order_payment.save
       return {
         order: nil,
-        errors: ["Unexpected value for Order's balance_due field -- PendingOrderPayment status is now '#{pendingOrderPayment.status}' -- payment declined!"]
+        errors: ["Unexpected value for Order's balance_due field -- PendingOrderPayment status is now '#{pending_order_payment.status}' -- payment declined!"]
       }
     end
   end
+  
 end
