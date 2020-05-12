@@ -106,5 +106,4 @@ class Mutations::CreatePayment < Mutations::BaseMutation
       }
     end
   end
-  
 end
