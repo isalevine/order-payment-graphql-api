@@ -24,14 +24,14 @@ class Mutations::CreatePayment < Mutations::BaseMutation
       amount: amount,
       note: note
     }
-    return find_payment_idempotency_key(payment_data_hash)
+    return lookup_payment_idempotency_key(payment_data_hash)
   end
 
 
   # Helper functions for resolve()
   # ==============================
 
-  def find_payment_idempotency_key(payment_data_hash)
+  def lookup_payment_idempotency_key(payment_data_hash)
     # New instances of the createPayment mutation will generate unique idempotency_key (UUID)
     idempotency_key = SecureRandom.uuid     # change this to a non-random String to test if idempotency_key match-found error is thrown (currently: yes!)
     
@@ -47,17 +47,17 @@ class Mutations::CreatePayment < Mutations::BaseMutation
         }
       # Payment not applied -- retry updating Order's balance_due field
       elsif pending_order_payment.status == "Pending" || pending_order_payment.status == "Failed"
-        return find_order_reference_key(payment_data_hash, idempotency_key: idempotency_key, pending_order_payment: pending_order_payment)
+        return lookup_order_reference_key(payment_data_hash, idempotency_key: idempotency_key, pending_order_payment: pending_order_payment)
       end
 
     # No idempotency_key match found -- look up Order by reference_key to apply Payment
     else
-      return find_order_reference_key(payment_data_hash, idempotency_key)
+      return lookup_order_reference_key(payment_data_hash, idempotency_key)
     end
   end
 
 
-  def find_order_reference_key(payment_data_hash, idempotency_key, pending_order_payment: nil)
+  def lookup_order_reference_key(payment_data_hash, idempotency_key, pending_order_payment: nil)
     order = Order.find_by(reference_key: payment_data_hash[:reference_key])
 
     # Order successfully found -- proceed to apply Payment
