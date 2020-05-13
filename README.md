@@ -9,7 +9,7 @@ The models can be illustrated as:
 
 and described as:
 
-*"An Order has many Payments through PendingOrderPayments."*
+_"An Order has many Payments through PendingOrderPayments."_
 
 `Orders` are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
 
