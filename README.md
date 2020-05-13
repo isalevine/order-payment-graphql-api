@@ -3,13 +3,9 @@
 ## Overview
 This Order Payment GraphQL API is a Rails app that accepts GraphQL queries and mutations. It uses [`Order`](https://github.com/isalevine/order-payment-graphql-api#order) and [`Payment`](https://github.com/isalevine/order-payment-graphql-api#payment) models, as well as a [`PendingOrderPayment`](https://github.com/isalevine/order-payment-graphql-api#pendingorderpayment) model to join them (as well as provide idempotency-checking and status updates). 
 
-The models can be illustrated as:
+The models can be illustrated as: `Order --< PendingOrderPayment >-- Payment`
 
-`Order --< PendingOrderPayment >-- Payment`
-
-and described as:
-
-_"An Order has many Payments through PendingOrderPayments."_
+and described as: _"An Order has many Payments through PendingOrderPayments."_
 
 `Orders` are not accessed by their sequential ID. Instead, they have a `reference_key` String field, with a unique, random UUID. **This value must be used when adding a** `Payment` **to an** `Order` **!**
 
