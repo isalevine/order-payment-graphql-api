@@ -1,7 +1,7 @@
 # README
 
 ## Overview
-This Order Payment GraphQL API is a Rails app that accepts GraphQL queries and mutations. It uses `Order` and `Payment` models, as well as a `PendingOrderPayment` model to join them (as well as provide idempotency-checking and status updates). 
+This Order Payment GraphQL API is a Rails app that accepts GraphQL queries and mutations. It uses [`Order`](https://github.com/isalevine/order-payment-graphql-api#order) and [`Payment`](https://github.com/isalevine/order-payment-graphql-api#payment) models, as well as a [`PendingOrderPayment`](https://github.com/isalevine/order-payment-graphql-api#pendingorderpayment) model to join them (as well as provide idempotency-checking and status updates). 
 
 The models can be illustrated and described as:
 `Order --< PendingOrderPayment >-- Payment`
@@ -12,9 +12,9 @@ The models can be illustrated and described as:
 
 `Payments` are checked for idempotency by having a unique, random UUID for their `idempotency_key`. `PendingOrderPayments` are created with a matching `idempotency_key`. If a `Payment` is sent multiple times, an existing `PendingOrderPayment` with the same `idempotency_key` will catch the duplication and handle it appropriately (either decline the `Payment`, or retry applying it to the `Order`).
 
-The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `createOrder` and `createPayment`. See the **Queries** and **Mutations** sections below for more information.
+The API accepts one GraphQL query, `allOrders`, and two GraphQL mutations, `createOrder` and `createPayment`. See the [**Queries**](https://github.com/isalevine/order-payment-graphql-api#queries) and [**Mutations**](https://github.com/isalevine/order-payment-graphql-api#mutations) sections below for more information.
 
-All primary goals were achieved. No stretch goals were achieved within the given timeframe. See **Assumptions**, notes under each **Model**, and the **Work Summary** below for more information on design choices, challenges encountered, and refactoring goals.
+All primary goals were achieved. No stretch goals were achieved within the given timeframe. See [**Assumptions**](https://github.com/isalevine/order-payment-graphql-api#assumptions), notes under each [**Model**](https://github.com/isalevine/order-payment-graphql-api#models), and the [**Work Summary**](https://github.com/isalevine/order-payment-graphql-api#work-summary) below for more information on design choices, challenges encountered, and refactoring goals.
 
 
 ## Highlights
